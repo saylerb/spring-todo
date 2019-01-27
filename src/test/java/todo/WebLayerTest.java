@@ -2,6 +2,7 @@ package todo;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,9 +15,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(TodoController.class)
+@WebMvcTest
 public class WebLayerTest {
 
+    public static final String API_ROOT = "/todos";
     @Autowired
     MockMvc mockMvc;
 
@@ -26,5 +28,12 @@ public class WebLayerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Hello, World!")));
+    }
+
+    @Test
+    public void shouldBeAbleToAddATodo() throws Exception {
+        this.mockMvc.perform(post(API_ROOT))
+            .andDo(print())
+            .andExpect(status().isOk());
     }
 }
