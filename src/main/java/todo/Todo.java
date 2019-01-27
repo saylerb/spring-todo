@@ -7,7 +7,11 @@ import javax.persistence.Id;
 @Entity
 public class Todo {
     private @Id @GeneratedValue Long id;
-    private final String title;
+    private String title;
+
+    public Todo() {
+        // No args constructor, needed for deserialization
+    }
 
     public Todo(String title) {
         this.title = title;
