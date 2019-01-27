@@ -23,7 +23,7 @@ public class MockMvcTest {
     private MockMvc mockMvc;
 
     @Test
-    public void shouldRespondWithMessage() throws Exception {
+    public void shouldStartFullSpringContextWithoutServerAndRetrieveMessage() throws Exception {
         this.mockMvc.perform(get("/"))
             .andDo(print())
             .andExpect(status().isOk())

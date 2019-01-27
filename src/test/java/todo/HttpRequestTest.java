@@ -21,7 +21,7 @@ public class HttpRequestTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void shouldHelloWorld() {
+    public void shouldStartFullSpringContextWithServerAndRetrieveHelloWorld() {
         String url = "http://localhost:" + port + "/";
 
         assertThat(this.restTemplate.getForObject(url, String.class)).contains("Hello, World!");

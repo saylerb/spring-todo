@@ -21,7 +21,7 @@ public class WebLayerTest {
     MockMvc mockMvc;
 
     @Test
-    public void shouldReturnTheDefaultMessage() throws Exception {
+    public void shouldStartTodoControllerOnlyAndRetrieveWelcomeMessage() throws Exception {
         this.mockMvc.perform(get("/"))
             .andDo(print())
             .andExpect(status().isOk())
