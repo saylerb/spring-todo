@@ -2,6 +2,7 @@ package todo;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,5 +30,15 @@ public class MockMvcTest {
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Hello, World!")));
     }
+
+    @Test
+    public void shouldAllowCors() throws Exception {
+        this.mockMvc.perform(options("/")
+            .header("Access-Control-Request-Method", "GET")
+            .header("Origin", "www.somethingelse.com"))
+            .andDo(print())
+            .andExpect(status().isOk());
+    }
+
 
 }
