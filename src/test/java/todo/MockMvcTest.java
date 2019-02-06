@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static todo.WebLayerTest.API_ROOT;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,14 @@ public class MockMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private TodoRepository todoRepository;
+
+    @After
+    public void cleanUp() {
+        todoRepository.deleteAll();
+    }
+
     @Test
     public void shouldStartFullSpringContextWithoutServerAndRetrieveMessage() throws Exception {
         this.mockMvc.perform(get("/"))
@@ -42,6 +51,15 @@ public class MockMvcTest {
             .header("Origin", "www.somethingelse.com"))
             .andDo(print())
             .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldBeAbleToGetAnEmptyListOfTodos() throws Exception {
+        this.mockMvc.perform(
+            get(API_ROOT))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().string("[]"));
     }
 
     @Test
