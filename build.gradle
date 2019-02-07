@@ -18,6 +18,30 @@ apply plugin: 'io.spring.dependency-management'
 
 sourceCompatibility = 1.8
 
+sourceSets {
+    databaseTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    databaseTestImplementation.extendsFrom implementation, testImplementation
+    databaseTestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+idea {
+    module {
+        testSourceDirs += sourceSets.databaseTest.java.srcDirs
+        testResourceDirs += sourceSets.databaseTest.resources.srcDirs
+        scopes.TEST.plus += [configurations.databaseTestRuntime]
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
 bootJar {
     baseName = 'spring-todo'
     version = '0.1.0'
@@ -34,3 +58,15 @@ dependencies {
     testImplementation('io.rest-assured:rest-assured:3.3.0')
     runtimeOnly('com.h2database:h2')
 }
+
+defaultTasks 'clean', 'build'
+
+task databaseTest(type: Test) {
+    group = 'verification'
+    description = 'Runs database tests.'
+    testClassesDirs = sourceSets.databaseTest.output.classesDirs
+    classpath = sourceSets.databaseTest.runtimeClasspath
+    shouldRunAfter test
+}
+
+check.dependsOn databaseTest
