@@ -1,6 +1,7 @@
 package todo;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -72,5 +73,13 @@ public class MockMvcTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("test todo"));
+    }
+
+    @Test
+    public void shouldBeAbleToDeleteAllExistingTodos() throws Exception {
+        this.mockMvc.perform(
+            delete(API_ROOT))
+            .andDo(print())
+            .andExpect(status().isOk());
     }
 }
