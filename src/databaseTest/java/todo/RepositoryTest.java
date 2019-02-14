@@ -2,6 +2,8 @@ package todo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,5 +34,16 @@ public class RepositoryTest {
         Todo readBack = this.todoRepository.findByTitle("a todo");
 
         assertThat(readBack.getTitle()).isEqualTo("a todo");
+    }
+
+    @Test
+    public void shouldBeAbleToDeleteATodo() {
+        this.entityManager.persist(new Todo("a todo"));
+
+        this.todoRepository.deleteAll();
+
+        List<Todo> allTodos = this.todoRepository.findAll();
+
+        assertThat(allTodos).isEmpty();
     }
 }
