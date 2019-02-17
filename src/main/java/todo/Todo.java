@@ -25,4 +25,12 @@ public class Todo {
     public boolean isCompleted() {
         return this.completed;
     }
+
+    public String getUrl() {
+        return String.valueOf(this.id);
+    }
+
+    public void setUrl(String url) {
+        this.id = Long.valueOf(url);
+    }
 }
