@@ -82,4 +82,16 @@ public class MockMvcTest {
             .andDo(print())
             .andExpect(status().isOk());
     }
+
+    @Test
+    public void shouldSetUpANewTodoAsInitiallyNotCompleted() throws Exception {
+        this.mockMvc.perform(
+            post(API_ROOT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"title\": \"test todo\" }".getBytes())
+                .characterEncoding("utf-8"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.completed").value("false"));
+    }
 }

@@ -8,6 +8,7 @@ import javax.persistence.Id;
 public class Todo {
     private @Id @GeneratedValue Long id;
     private String title;
+    private boolean completed;
 
     public Todo() {
         // No args constructor, needed for deserialization
@@ -19,5 +20,9 @@ public class Todo {
 
     public String getTitle() {
         return this.title;
+    }
+
+    public boolean isCompleted() {
+        return this.completed;
     }
 }
