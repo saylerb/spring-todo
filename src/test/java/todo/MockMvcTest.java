@@ -1,5 +1,6 @@
 package todo;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,7 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static todo.WebLayerTest.API_ROOT;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,7 +102,7 @@ public class MockMvcTest {
     }
 
     @Test
-    public void shouldSetUpANewTodoWithAUniqueUrl() throws Exception {
+    public void shouldSetUpANewTodoWithAUniqueUrlEqualToItsId() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         MvcResult result = this.mockMvc.perform(
@@ -112,11 +116,25 @@ public class MockMvcTest {
 
         Todo createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        String todoURL = createdTodo.getUrl();
+        assertThat(createdTodo.getUrl()).isEqualTo(createdTodo.getUrl());
+    }
+
+    @Test
+    public void shouldBeAbleToRetrieveATodoByItsUrl() throws Exception {
+        Todo newTodo = new Todo("test todo");
+
+        Todo savedTodo = todoRepository.save(newTodo);
+
+        Optional<Todo> readBackTodo = todoRepository.findById(savedTodo.getId());
+
+        if (!readBackTodo.isPresent()) {
+            throw new NotFoundException("Todo not found!");
+        }
 
         this.mockMvc.perform(
-            get(API_ROOT + "/" + todoURL))
+            get(API_ROOT + "/" + readBackTodo.get().getUrl()))
             .andDo(print())
-            .andExpect(jsonPath("$.url").value(todoURL));
+            .andExpect(jsonPath("$.url").value(readBackTodo.get().getUrl()));
     }
 }
+

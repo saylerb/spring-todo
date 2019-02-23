@@ -33,4 +33,8 @@ public class Todo {
     public void setUrl(String url) {
         this.id = Long.valueOf(url);
     }
+
+    public Long getId() {
+        return id;
+    }
 }
