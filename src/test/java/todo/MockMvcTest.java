@@ -37,6 +37,7 @@ public class MockMvcTest {
 
     @Autowired
     private TodoRepository todoRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @After
     public void cleanUp() {
@@ -103,8 +104,6 @@ public class MockMvcTest {
 
     @Test
     public void shouldSetUpANewTodoWithAUniqueUrlEqualToItsId() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         MvcResult result = this.mockMvc.perform(
             post(API_ROOT)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -131,10 +130,14 @@ public class MockMvcTest {
             throw new NotFoundException("Todo not found!");
         }
 
-        this.mockMvc.perform(
+        MvcResult result = this.mockMvc.perform(
             get(API_ROOT + "/" + readBackTodo.get().getUrl()))
             .andDo(print())
-            .andExpect(jsonPath("$.url").value(readBackTodo.get().getUrl()));
+            .andReturn();
+
+        Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+
+        assertThat(resultTodo).isEqualTo(readBackTodo.get());
     }
 }
 
