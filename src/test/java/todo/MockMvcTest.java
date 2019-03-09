@@ -6,9 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static todo.WebLayerTest.API_ROOT;
 
@@ -47,7 +45,6 @@ public class MockMvcTest {
     @Test
     public void shouldStartFullSpringContextWithoutServerAndRetrieveMessage() throws Exception {
         this.mockMvc.perform(get("/"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Hello, World!")));
     }
@@ -57,7 +54,6 @@ public class MockMvcTest {
         this.mockMvc.perform(options("/")
             .header("Access-Control-Request-Method", "GET")
             .header("Origin", "www.somethingelse.com"))
-            .andDo(print())
             .andExpect(status().isOk());
     }
 
@@ -65,41 +61,45 @@ public class MockMvcTest {
     public void shouldBeAbleToGetAnEmptyListOfTodos() throws Exception {
         this.mockMvc.perform(
             get(API_ROOT))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().string("[]"));
     }
 
     @Test
     public void shouldBeAbleToAddATodo() throws Exception {
-        this.mockMvc.perform(
+        MvcResult result = this.mockMvc.perform(
             post(API_ROOT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"test todo\" }".getBytes())
                 .characterEncoding("utf-8"))
-            .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("test todo"));
+            .andReturn();
+
+        Todo createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+
+        assertThat(createdTodo.getTitle()).isEqualTo("test todo");
     }
 
     @Test
     public void shouldBeAbleToDeleteAllExistingTodos() throws Exception {
         this.mockMvc.perform(
             delete(API_ROOT))
-            .andDo(print())
             .andExpect(status().isOk());
     }
 
     @Test
     public void shouldSetUpANewTodoAsInitiallyNotCompleted() throws Exception {
-        this.mockMvc.perform(
+        MvcResult result = mockMvc.perform(
             post(API_ROOT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"test todo\" }".getBytes())
                 .characterEncoding("utf-8"))
-            .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.completed").value("false"));
+            .andReturn();
+
+        Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+
+        assertThat(resultTodo.isCompleted()).isFalse();
     }
 
     @Test
@@ -109,7 +109,6 @@ public class MockMvcTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"test todo\" }".getBytes())
                 .characterEncoding("utf-8"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
 
@@ -132,7 +131,6 @@ public class MockMvcTest {
 
         MvcResult result = this.mockMvc.perform(
             get(API_ROOT + "/" + readBackTodo.get().getUrl()))
-            .andDo(print())
             .andReturn();
 
         Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
