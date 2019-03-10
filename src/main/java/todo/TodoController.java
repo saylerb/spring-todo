@@ -2,11 +2,14 @@ package todo;
 
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,4 +52,23 @@ public class TodoController {
         return repository.findById(id);
     }
 
+    @RequestMapping(value = "todos/{id}", method = PATCH)
+    public @ResponseBody
+    Todo edit(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) throws Exception {
+        Optional<Todo> byId = repository.findById(id);
+
+        if (byId.isPresent()) {
+            Todo existing = byId.get();
+
+            Todo updatedTodo = new Todo(existing.getId(),
+                updates.get("title").toString(),
+                existing.isCompleted()
+            );
+
+            return repository.save(updatedTodo);
+
+        } else {
+            throw new NotFoundException("Todo not found");
+        }
+    }
 }

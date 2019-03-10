@@ -2,10 +2,8 @@ package todo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static todo.WebLayerTest.API_ROOT;
@@ -136,6 +134,34 @@ public class MockMvcTest {
         Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
         assertThat(resultTodo).isEqualTo(readBackTodo.get());
+    }
+
+    @Test
+    public void shouldBeAbleToPatchATodoWithAPartialUpdate() throws Exception {
+        Todo newTodo = new Todo("initial title");
+
+        Todo savedTodo = todoRepository.save(newTodo);
+
+        Optional<Todo> readBackTodo = todoRepository.findById(savedTodo.getId());
+
+        if (!readBackTodo.isPresent()) {
+            throw new NotFoundException("Todo not found!");
+        }
+
+        MvcResult result = this.mockMvc.perform(
+            patch(API_ROOT + "/" + readBackTodo.get().getUrl())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"title\": \"edited title\" }".getBytes())
+                .characterEncoding("utf-8"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+
+        assertThat(editedTodo.getTitle()).isEqualTo("edited title");
+        assertThat(editedTodo.getId()).isEqualTo(readBackTodo.get().getId());
+        assertThat(editedTodo.isCompleted()).isEqualTo(readBackTodo.get().isCompleted());
     }
 }
 
