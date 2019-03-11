@@ -54,19 +54,20 @@ public class TodoController {
 
     @RequestMapping(value = "todos/{id}", method = PATCH)
     public @ResponseBody
-    Todo edit(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) throws Exception {
+    Todo edit(@RequestBody Map<String, String> updates, @PathVariable("id") Long id) throws Exception {
         Optional<Todo> byId = repository.findById(id);
 
         if (byId.isPresent()) {
             Todo existing = byId.get();
 
+            Optional<String> title = Optional.ofNullable(updates.get("title"));
+            Optional<Boolean> completed = Optional.of(Boolean.valueOf(updates.get("completed")));
+
             Todo updatedTodo = new Todo(existing.getId(),
-                updates.get("title").toString(),
-                existing.isCompleted()
+                title.orElse(existing.getTitle()),
+                completed.orElse(existing.isCompleted())
             );
-
             return repository.save(updatedTodo);
-
         } else {
             throw new NotFoundException("Todo not found");
         }
