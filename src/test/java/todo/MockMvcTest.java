@@ -8,8 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static todo.WebLayerTest.API_ROOT;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.After;
@@ -42,14 +40,14 @@ public class MockMvcTest {
 
     @Test
     public void shouldStartFullSpringContextWithoutServerAndRetrieveMessage() throws Exception {
-        this.mockMvc.perform(get("/"))
+        mockMvc.perform(get("/"))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Hello, World!")));
     }
 
     @Test
     public void shouldAllowCors() throws Exception {
-        this.mockMvc.perform(options("/")
+        mockMvc.perform(options("/")
             .header("Access-Control-Request-Method", "GET")
             .header("Origin", "www.somethingelse.com"))
             .andExpect(status().isOk());
@@ -57,7 +55,7 @@ public class MockMvcTest {
 
     @Test
     public void shouldBeAbleToGetAnEmptyListOfTodos() throws Exception {
-        this.mockMvc.perform(
+        mockMvc.perform(
             get(API_ROOT))
             .andExpect(status().isOk())
             .andExpect(content().string("[]"));
@@ -65,7 +63,7 @@ public class MockMvcTest {
 
     @Test
     public void shouldBeAbleToAddATodo() throws Exception {
-        MvcResult result = this.mockMvc.perform(
+        MvcResult result = mockMvc.perform(
             post(API_ROOT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"test todo\" }".getBytes())
@@ -80,7 +78,7 @@ public class MockMvcTest {
 
     @Test
     public void shouldBeAbleToDeleteAllExistingTodos() throws Exception {
-        this.mockMvc.perform(
+        mockMvc.perform(
             delete(API_ROOT))
             .andExpect(status().isOk());
     }
@@ -102,7 +100,7 @@ public class MockMvcTest {
 
     @Test
     public void shouldSetUpANewTodoWithAUniqueUrlEqualToItsId() throws Exception {
-        MvcResult result = this.mockMvc.perform(
+        MvcResult result = mockMvc.perform(
             post(API_ROOT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"test todo\" }".getBytes())
@@ -112,7 +110,7 @@ public class MockMvcTest {
 
         Todo createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(createdTodo.getUrl()).isEqualTo(createdTodo.getUrl());
+        assertThat(createdTodo.getUrl()).isEqualTo(String.valueOf(createdTodo.getId()));
     }
 
     @Test
@@ -121,19 +119,16 @@ public class MockMvcTest {
 
         Todo savedTodo = todoRepository.save(newTodo);
 
-        Optional<Todo> readBackTodo = todoRepository.findById(savedTodo.getId());
+        Todo readBackTodo = todoRepository.findById(savedTodo.getId())
+            .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
-        if (!readBackTodo.isPresent()) {
-            throw new NotFoundException("Todo not found!");
-        }
-
-        MvcResult result = this.mockMvc.perform(
-            get(API_ROOT + "/" + readBackTodo.get().getUrl()))
+        MvcResult result = mockMvc.perform(
+            get(API_ROOT + "/" + readBackTodo.getUrl()))
             .andReturn();
 
         Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(resultTodo).isEqualTo(readBackTodo.get());
+        assertThat(resultTodo).isEqualTo(readBackTodo);
     }
 
     @Test
@@ -142,14 +137,11 @@ public class MockMvcTest {
 
         Todo savedTodo = todoRepository.save(newTodo);
 
-        Optional<Todo> readBackTodo = todoRepository.findById(savedTodo.getId());
+        Todo readBackTodo = todoRepository.findById(savedTodo.getId())
+            .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
-        if (!readBackTodo.isPresent()) {
-            throw new NotFoundException("Todo not found!");
-        }
-
-        MvcResult result = this.mockMvc.perform(
-            patch(API_ROOT + "/" + readBackTodo.get().getUrl())
+        MvcResult result = mockMvc.perform(
+            patch(API_ROOT + "/" + readBackTodo.getUrl())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"edited title\" }".getBytes())
                 .characterEncoding("utf-8"))
@@ -159,25 +151,22 @@ public class MockMvcTest {
 
         Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(editedTodo.getTitle()).isEqualTo("edited title");
-        assertThat(editedTodo.getId()).isEqualTo(readBackTodo.get().getId());
-        assertThat(editedTodo.isCompleted()).isEqualTo(readBackTodo.get().isCompleted());
+        Todo expected = new Todo(readBackTodo.getId(), "edited title", readBackTodo.isCompleted());
+
+        assertThat(editedTodo).isEqualTo(expected);
     }
 
     @Test
     public void shouldBeAbleToPatchATodoWithAPartialUpdateToConfirmed() throws Exception {
-        Todo newTodo = new Todo(null,"initial title", false);
+        Todo newTodo = new Todo(null, "initial title", false);
 
         Todo savedTodo = todoRepository.save(newTodo);
 
-        Optional<Todo> readBackTodo = todoRepository.findById(savedTodo.getId());
+        Todo readBackTodo = todoRepository.findById(savedTodo.getId())
+            .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
-        if (!readBackTodo.isPresent()) {
-            throw new NotFoundException("Todo not found!");
-        }
-
-        MvcResult result = this.mockMvc.perform(
-            patch(API_ROOT + "/" + readBackTodo.get().getUrl())
+        MvcResult result = mockMvc.perform(
+            patch(API_ROOT + "/" + readBackTodo.getUrl())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"completed\": \"true\" }".getBytes())
                 .characterEncoding("utf-8"))
@@ -185,39 +174,33 @@ public class MockMvcTest {
             .andExpect(status().isOk())
             .andReturn();
 
-        Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        Todo edited = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(editedTodo.getTitle()).isEqualTo("initial title");
-        assertThat(editedTodo.getId()).isEqualTo(readBackTodo.get().getId());
-        assertThat(editedTodo.isCompleted()).isEqualTo(true);
+        Todo expected = new Todo(readBackTodo.getId(), "initial title", true);
+
+        assertThat(edited).isEqualTo(expected);
     }
 
     @Test
     public void shouldReturnExitingTodoWithAnEmptyPatch() throws Exception {
-        Todo newTodo = new Todo(null,"initial title", true);
+        Todo newTodo = new Todo(null, "initial title", true);
 
         Todo savedTodo = todoRepository.save(newTodo);
 
-        Optional<Todo> readBackTodo = todoRepository.findById(savedTodo.getId());
+        Todo readBackTodo = todoRepository.findById(savedTodo.getId())
+            .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
-        if (!readBackTodo.isPresent()) {
-            throw new NotFoundException("Todo not found!");
-        }
-
-        MvcResult result = this.mockMvc.perform(
-            patch(API_ROOT + "/" + readBackTodo.get().getUrl())
+        MvcResult result = mockMvc.perform(
+            patch(API_ROOT + "/" + readBackTodo.getUrl())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}".getBytes())
                 .characterEncoding("utf-8"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andReturn();
 
         Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(editedTodo.getId()).isEqualTo(readBackTodo.get().getId());
-        assertThat(editedTodo.getTitle()).isEqualTo(readBackTodo.get().getTitle());
-        assertThat(editedTodo.isCompleted()).isEqualTo(readBackTodo.get().isCompleted());
+        assertThat(editedTodo).isEqualTo(readBackTodo);
     }
 }
 
