@@ -61,11 +61,11 @@ public class TodoController {
             Todo existing = byId.get();
 
             Optional<String> title = Optional.ofNullable(updates.get("title"));
-            Optional<Boolean> completed = Optional.of(Boolean.valueOf(updates.get("completed")));
+            Optional<String> completedString = Optional.ofNullable(updates.get("completed"));
 
             Todo updatedTodo = new Todo(existing.getId(),
                 title.orElse(existing.getTitle()),
-                completed.orElse(existing.isCompleted())
+                completedString.map(Boolean::valueOf).orElseGet(existing::isCompleted)
             );
             return repository.save(updatedTodo);
         } else {
