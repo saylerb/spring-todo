@@ -35,7 +35,7 @@ public class RepositoryTest {
 
         assertThat(readBack.getTitle()).isEqualTo("a todo");
         assertThat(readBack.getUrl()).isInstanceOf(String.class);
-        assertThat(Integer.valueOf(readBack.getUrl())).isGreaterThan(0);
+        assertThat(readBack.getUrl()).contains(String.valueOf(readBack.getId()));
     }
 
     @Test

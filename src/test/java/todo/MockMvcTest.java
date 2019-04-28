@@ -112,25 +112,29 @@ public class MockMvcTest {
 
         Todo createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(createdTodo.getUrl()).isEqualTo(String.valueOf(createdTodo.getId()));
+        assertThat(createdTodo.getUrl()).contains(String.valueOf(createdTodo.getId()));
     }
 
     @Test
     public void shouldBeAbleToRetrieveATodoByItsUrl() throws Exception {
-        Todo newTodo = new Todo("test todo");
-
-        Todo savedTodo = todoRepository.save(newTodo);
-
-        Todo readBackTodo = todoRepository.findById(savedTodo.getId())
-                .orElseThrow(() -> new NotFoundException("Todo not found!"));
-
-        MvcResult result = mockMvc.perform(
-                get(API_ROOT + "/" + readBackTodo.getUrl()))
+        MvcResult newTodoRequest = mockMvc.perform(
+                post(API_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"title\": \"test todo\" }".getBytes())
+                        .characterEncoding("utf-8"))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        Todo newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(), Todo.class);
 
-        assertThat(resultTodo).isEqualTo(readBackTodo);
+        MvcResult readBackTodo = mockMvc.perform(
+                get(newTodo.getUrl()))
+                .andDo(print())
+                .andReturn();
+
+        Todo resultTodo = objectMapper.readValue(readBackTodo.getResponse().getContentAsString(), Todo.class);
+
+        assertThat(resultTodo).isEqualTo(newTodo);
     }
 
     @Test
@@ -143,7 +147,7 @@ public class MockMvcTest {
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
         MvcResult result = mockMvc.perform(
-                patch(API_ROOT + "/" + readBackTodo.getUrl())
+                patch(readBackTodo.getUrl())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"title\": \"edited title\" }".getBytes())
                         .characterEncoding("utf-8"))
@@ -168,7 +172,7 @@ public class MockMvcTest {
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
         MvcResult result = mockMvc.perform(
-                patch(API_ROOT + "/" + readBackTodo.getUrl())
+                patch(readBackTodo.getUrl())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"completed\": \"true\" }".getBytes())
                         .characterEncoding("utf-8"))
@@ -193,7 +197,7 @@ public class MockMvcTest {
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
         MvcResult result = mockMvc.perform(
-                patch(API_ROOT + "/" + readBackTodo.getUrl())
+                patch(readBackTodo.getUrl())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}".getBytes())
                         .characterEncoding("utf-8"))
@@ -215,7 +219,7 @@ public class MockMvcTest {
         Todo expected = new Todo(savedTodo.getId(), "changed title", true);
 
         MvcResult patchResult = mockMvc.perform(
-                patch(API_ROOT + "/" + readBackTodo.getUrl())
+                patch(readBackTodo.getUrl())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"title\": \"changed title\", \"completed\": \"true\" }".getBytes())
                         .characterEncoding("utf-8"))

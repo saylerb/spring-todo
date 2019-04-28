@@ -1,5 +1,8 @@
 package todo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -33,12 +36,9 @@ public class Todo {
         return this.completed;
     }
 
+    @JsonProperty(access = Access.READ_ONLY)
     public String getUrl() {
-        return String.valueOf(this.id);
-    }
-
-    public void setUrl(String url) {
-        this.id = Long.valueOf(url);
+        return String.format("http://localhost:8080/todos/%s", this.id);
     }
 
     @Override public boolean equals(Object o) {
