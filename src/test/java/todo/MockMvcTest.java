@@ -240,5 +240,27 @@ public class MockMvcTest {
 
         assertThat(editedTodos).contains(expected);
     }
+
+    @Test
+    public void shouldDeleteATodoWhenMakingADeleteRequestToItsUrl() throws Exception {
+        MvcResult newTodoRequest = mockMvc.perform(
+                post(API_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"title\": \"test todo\" }".getBytes())
+                        .characterEncoding("utf-8"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Todo newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(), Todo.class);
+
+        mockMvc.perform(
+                delete(newTodo.getUrl()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(
+                get(API_ROOT))
+                .andExpect(status().isOk())
+                .andExpect(content().string("[]"));
+    }
 }
 

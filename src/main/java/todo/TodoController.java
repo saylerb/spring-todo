@@ -64,12 +64,18 @@ public class TodoController {
             Optional<String> completedString = Optional.ofNullable(updates.get("completed"));
 
             Todo updatedTodo = new Todo(existing.getId(),
-                title.orElse(existing.getTitle()),
-                completedString.map(Boolean::valueOf).orElseGet(existing::isCompleted)
+                    title.orElse(existing.getTitle()),
+                    completedString.map(Boolean::valueOf).orElseGet(existing::isCompleted)
             );
             return repository.save(updatedTodo);
         } else {
             throw new NotFoundException("Todo not found");
         }
+    }
+
+    @RequestMapping(value = "todos/{id}", method = DELETE)
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteById(@PathVariable("id") Long id) {
+        repository.deleteById(id);
     }
 }
