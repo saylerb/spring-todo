@@ -157,14 +157,14 @@ public class MockMvcTest {
 
         Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        Todo expected = new Todo(readBackTodo.getId(), "edited title", readBackTodo.isCompleted());
+        Todo expected = new Todo(readBackTodo.getId(), "edited title", readBackTodo.isCompleted(), null);
 
         assertThat(editedTodo).isEqualTo(expected);
     }
 
     @Test
     public void shouldBeAbleToPatchATodoWithAPartialUpdateToConfirmed() throws Exception {
-        Todo newTodo = new Todo(null, "initial title", false);
+        Todo newTodo = new Todo(null, "initial title", false, null);
 
         Todo savedTodo = todoRepository.save(newTodo);
 
@@ -182,14 +182,14 @@ public class MockMvcTest {
 
         Todo edited = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
 
-        Todo expected = new Todo(readBackTodo.getId(), "initial title", true);
+        Todo expected = new Todo(readBackTodo.getId(), "initial title", true, null);
 
         assertThat(edited).isEqualTo(expected);
     }
 
     @Test
     public void shouldReturnExitingTodoWithAnEmptyPatch() throws Exception {
-        Todo newTodo = new Todo(null, "initial title", true);
+        Todo newTodo = new Todo(null, "initial title", true, null);
 
         Todo savedTodo = todoRepository.save(newTodo);
 
@@ -211,12 +211,12 @@ public class MockMvcTest {
 
     @Test
     public void shouldPersistChangesAndShowUpWhenReFetchingTheTodo() throws Exception {
-        Todo newTodo = new Todo(null, "initial title", false);
+        Todo newTodo = new Todo(null, "initial title", false, null);
 
         Todo savedTodo = todoRepository.save(newTodo);
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId()).get();
-        Todo expected = new Todo(savedTodo.getId(), "changed title", true);
+        Todo expected = new Todo(savedTodo.getId(), "changed title", true, null);
 
         MvcResult patchResult = mockMvc.perform(
                 patch(readBackTodo.getUrl())
@@ -261,6 +261,22 @@ public class MockMvcTest {
                 get(API_ROOT))
                 .andExpect(status().isOk())
                 .andExpect(content().string("[]"));
+    }
+
+    @Test
+    public void shouldCreateATodoWithAnOrderField() throws Exception {
+        MvcResult newTodoRequest = mockMvc.perform(
+                post(API_ROOT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(("{ \"title\": \"test todo\", \"order\": 523}").getBytes())
+                        .characterEncoding("utf-8"))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        Todo newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(), Todo.class);
+
+        assertThat(newTodo.getOrderNumber()).isEqualTo(523);
     }
 }
 

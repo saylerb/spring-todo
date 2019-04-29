@@ -27,17 +27,20 @@ public class TodoController {
     }
 
     @RequestMapping(value = "/")
-    public @ResponseBody String hello() {
+    public @ResponseBody
+    String hello() {
         return "Hello, World!";
     }
 
     @RequestMapping(value = "/todos", method = POST)
-    public @ResponseBody Todo create(@RequestBody Todo newTodo) {
+    public @ResponseBody
+    Todo create(@RequestBody Todo newTodo) {
         return repository.save(newTodo);
     }
 
     @RequestMapping(value = "/todos", method = GET)
-    public @ResponseBody List<Todo> getAll() {
+    public @ResponseBody
+    List<Todo> getAll() {
         return repository.findAll();
     }
 
@@ -48,7 +51,8 @@ public class TodoController {
     }
 
     @RequestMapping(value = "/todos/{id}", method = GET)
-    public @ResponseBody Optional<Todo> getOne(@PathVariable("id") Long id) {
+    public @ResponseBody
+    Optional<Todo> getOne(@PathVariable("id") Long id) {
         return repository.findById(id);
     }
 
@@ -62,10 +66,13 @@ public class TodoController {
 
             Optional<String> title = Optional.ofNullable(updates.get("title"));
             Optional<String> completedString = Optional.ofNullable(updates.get("completed"));
+            Optional<String> order = Optional.ofNullable(updates.get("order"));
 
             Todo updatedTodo = new Todo(existing.getId(),
                     title.orElse(existing.getTitle()),
-                    completedString.map(Boolean::valueOf).orElseGet(existing::isCompleted)
+                    completedString.map(Boolean::valueOf).orElseGet(existing::isCompleted),
+                    order.map(Integer::valueOf).orElse(null)
+
             );
             return repository.save(updatedTodo);
         } else {
