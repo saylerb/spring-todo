@@ -26,7 +26,7 @@ public class HttpRequestTest {
 
     @Test
     public void shouldStartFullSpringContextWithServerAndRetrieveHelloWorld() {
-        String url = "http://localhost:" + port + "/";
+        String url = "http://localhost:" + port + "/todos/hello";
 
         assertThat(this.restTemplate.getForObject(url, String.class)).contains("Hello, World!");
     }
@@ -38,7 +38,7 @@ public class HttpRequestTest {
                 restTemplate
                     .getRestTemplate()
                     .getUriTemplateHandler()
-                    .expand("/"))
+                    .expand("/todos/hello"))
                 .header(HttpHeaders.ORIGIN, "http://www.someotherurl.com").build(),
             String.class
         );

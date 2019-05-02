@@ -32,7 +32,7 @@ public class WebLayerTest {
 
     @Test
     public void shouldStartTodoControllerOnlyAndRetrieveWelcomeMessage() throws Exception {
-        this.mockMvc.perform(get("/"))
+        this.mockMvc.perform(get("/todos/hello"))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Hello, World!")));

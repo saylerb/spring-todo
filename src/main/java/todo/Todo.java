@@ -1,7 +1,6 @@
 package todo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,8 +16,10 @@ public class Todo {
     private boolean completed;
     private Integer orderNumber;
 
+    /**
+     * No args constructor, needed for deserialization
+     */
     public Todo() {
-        // No args constructor, needed for deserialization
     }
 
     public Todo(String title) {
@@ -38,11 +39,6 @@ public class Todo {
 
     public boolean isCompleted() {
         return this.completed;
-    }
-
-    @JsonProperty(access = Access.READ_ONLY)
-    public String getUrl() {
-        return String.format("http://localhost:8080/todos/%s", this.id);
     }
 
     @Override

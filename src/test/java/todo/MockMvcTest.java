@@ -1,13 +1,5 @@
 package todo;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static todo.WebLayerTest.API_ROOT;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
@@ -23,6 +15,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static todo.WebLayerTest.API_ROOT;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,14 +46,14 @@ public class MockMvcTest {
 
     @Test
     public void shouldStartFullSpringContextWithoutServerAndRetrieveMessage() throws Exception {
-        mockMvc.perform(get("/"))
+        mockMvc.perform(get("/todos/hello"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Hello, World!")));
     }
 
     @Test
     public void shouldAllowCors() throws Exception {
-        mockMvc.perform(options("/")
+        mockMvc.perform(options("/todos/hello")
                 .header("Access-Control-Request-Method", "GET")
                 .header("Origin", "www.somethingelse.com"))
                 .andExpect(status().isOk());
@@ -73,9 +77,11 @@ public class MockMvcTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        TodoResponse createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(),
+                TodoResponse.class);
 
         assertThat(createdTodo.getTitle()).isEqualTo("test todo");
+        assertThat(createdTodo.getUrl()).isNotNull();
     }
 
     @Test
@@ -95,7 +101,7 @@ public class MockMvcTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        TodoResponse resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), TodoResponse.class);
 
         assertThat(resultTodo.isCompleted()).isFalse();
     }
@@ -110,7 +116,8 @@ public class MockMvcTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        TodoResponse createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(),
+                TodoResponse.class);
 
         assertThat(createdTodo.getUrl()).contains(String.valueOf(createdTodo.getId()));
     }
@@ -125,16 +132,20 @@ public class MockMvcTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(), Todo.class);
+        TodoResponse newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(),
+                TodoResponse.class);
+
+        System.out.println(newTodo.getUrl());
 
         MvcResult readBackTodo = mockMvc.perform(
                 get(newTodo.getUrl()))
                 .andDo(print())
                 .andReturn();
 
-        Todo resultTodo = objectMapper.readValue(readBackTodo.getResponse().getContentAsString(), Todo.class);
+        TodoResponse resultTodo = objectMapper.readValue(readBackTodo.getResponse().getContentAsString(),
+                TodoResponse.class);
 
-        assertThat(resultTodo).isEqualTo(newTodo);
+        assertThat(resultTodo).isEqualToComparingFieldByField(newTodo);
     }
 
     @Test
@@ -147,19 +158,19 @@ public class MockMvcTest {
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
         MvcResult result = mockMvc.perform(
-                patch(readBackTodo.getUrl())
+                patch(API_ROOT + "/" + readBackTodo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"title\": \"edited title\" }".getBytes())
                         .characterEncoding("utf-8"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        TodoResponse editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), TodoResponse.class);
 
-        Todo expected = new Todo(readBackTodo.getId(), "edited title", readBackTodo.isCompleted(), null);
+        TodoResponse expected = new TodoResponse(readBackTodo.getId(), "edited title", readBackTodo.isCompleted(),
+                null, "http://localhost/todos/" + readBackTodo.getId());
 
-        assertThat(editedTodo).isEqualTo(expected);
+        assertThat(editedTodo).isEqualToComparingFieldByField(expected);
     }
 
     @Test
@@ -172,19 +183,18 @@ public class MockMvcTest {
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
 
         MvcResult result = mockMvc.perform(
-                patch(readBackTodo.getUrl())
+                patch(API_ROOT + "/" + readBackTodo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"completed\": \"true\" }".getBytes())
                         .characterEncoding("utf-8"))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo edited = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        TodoResponse expected = new TodoResponse(readBackTodo.getId(), "initial title", true, null, "http://localhost" +
+                "/todos/" + readBackTodo.getId());
+        TodoResponse edited = objectMapper.readValue(result.getResponse().getContentAsString(), TodoResponse.class);
 
-        Todo expected = new Todo(readBackTodo.getId(), "initial title", true, null);
-
-        assertThat(edited).isEqualTo(expected);
+        assertThat(edited).isEqualToComparingFieldByField(expected);
     }
 
     @Test
@@ -195,18 +205,19 @@ public class MockMvcTest {
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId())
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
+        TodoResponse expected = TodoResponse.from(readBackTodo, "http://localhost/todos/" + readBackTodo.getId());
 
         MvcResult result = mockMvc.perform(
-                patch(readBackTodo.getUrl())
+                patch(API_ROOT + "/" + readBackTodo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}".getBytes())
                         .characterEncoding("utf-8"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), Todo.class);
+        TodoResponse editedTodo = objectMapper.readValue(result.getResponse().getContentAsString(), TodoResponse.class);
 
-        assertThat(editedTodo).isEqualTo(readBackTodo);
+        assertThat(editedTodo).isEqualToComparingFieldByField(expected);
     }
 
     @Test
@@ -216,29 +227,35 @@ public class MockMvcTest {
         Todo savedTodo = todoRepository.save(newTodo);
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId()).get();
-        Todo expected = new Todo(savedTodo.getId(), "changed title", true, null);
+        TodoResponse expected = new TodoResponse(
+                savedTodo.getId(),
+                "changed title",
+                true,
+                null,
+                "http://localhost/todos/" + savedTodo.getId());
 
         MvcResult patchResult = mockMvc.perform(
-                patch(readBackTodo.getUrl())
+                patch(API_ROOT + "/" + readBackTodo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"title\": \"changed title\", \"completed\": \"true\" }".getBytes())
                         .characterEncoding("utf-8"))
-                .andDo(print())
                 .andReturn();
 
-        Todo editedTodo = objectMapper.readValue(patchResult.getResponse().getContentAsString(), Todo.class);
+        TodoResponse editedTodo = objectMapper.readValue(patchResult.getResponse().getContentAsString(),
+                TodoResponse.class);
 
-        assertThat(editedTodo).isEqualTo(expected);
+        assertThat(editedTodo).isEqualToComparingFieldByField(expected);
 
         MvcResult getResult = mockMvc.perform(
                 get(API_ROOT))
                 .andReturn();
 
-        List<Todo> editedTodos = objectMapper.readValue(getResult.getResponse().getContentAsString(),
-                new TypeReference<List<Todo>>() {
+        List<TodoResponse> editedTodos = objectMapper.readValue(getResult.getResponse().getContentAsString(),
+                new TypeReference<List<TodoResponse>>() {
                 });
 
-        assertThat(editedTodos).contains(expected);
+        assertThat(editedTodos.get(0)).isEqualToIgnoringNullFields(expected);
+        assertThat(editedTodos.get(0).getUrl()).isNotNull();
     }
 
     @Test
@@ -251,10 +268,11 @@ public class MockMvcTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Todo newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(), Todo.class);
+        TodoResponse response = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(),
+                TodoResponse.class);
 
         mockMvc.perform(
-                delete(newTodo.getUrl()))
+                delete(response.getUrl()))
                 .andExpect(status().isOk());
 
         mockMvc.perform(
@@ -274,9 +292,9 @@ public class MockMvcTest {
                 .andDo(print())
                 .andReturn();
 
-        Todo newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(), Todo.class);
+        TodoResponse newTodo = objectMapper.readValue(newTodoRequest.getResponse().getContentAsString(),
+                TodoResponse.class);
 
-        assertThat(newTodo.getOrderNumber()).isEqualTo(523);
+        assertThat(newTodo.getOrder()).isEqualTo(523);
     }
 }
-
