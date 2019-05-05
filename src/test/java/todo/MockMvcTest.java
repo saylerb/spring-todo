@@ -205,7 +205,7 @@ public class MockMvcTest {
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId())
                 .orElseThrow(() -> new NotFoundException("Todo not found!"));
-        TodoResponse expected = TodoResponse.from(readBackTodo, "http://localhost/todos/" + readBackTodo.getId());
+        TodoResponse expected = TodoResponse.from(readBackTodo);
 
         MvcResult result = mockMvc.perform(
                 patch(API_ROOT + "/" + readBackTodo.getId())
@@ -226,7 +226,9 @@ public class MockMvcTest {
 
         Todo savedTodo = todoRepository.save(newTodo);
 
-        Todo readBackTodo = todoRepository.findById(savedTodo.getId()).get();
+        Todo readBackTodo = todoRepository.findById(savedTodo.getId())
+                .orElseThrow(() -> new NotFoundException("Not found"));
+
         TodoResponse expected = new TodoResponse(
                 savedTodo.getId(),
                 "changed title",

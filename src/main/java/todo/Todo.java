@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.Objects;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 @Entity
 public class Todo {
     private @Id
@@ -61,8 +63,12 @@ public class Todo {
         return id;
     }
 
-    @JsonProperty(value = "order") // "order" is reserved in h2
+    @JsonProperty(value = "order") // "order" is reserved in h2 TODO: Add request object
     public Integer getOrderNumber() {
         return orderNumber;
+    }
+
+    public String getUrl() {
+        return linkTo(TodoController.class).slash(this.getId()).withSelfRel().getHref();
     }
 }

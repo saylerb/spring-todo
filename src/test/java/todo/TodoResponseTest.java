@@ -9,10 +9,9 @@ public class TodoResponseTest {
     @Test
     public void shouldSetAUrlOnTodo() {
         Todo todo = new Todo(1L, "Clean kitchen", false, 1);
-        String url = "/some/link/to/todo";
 
-        TodoResponse expected = new TodoResponse(1L, "Clean kitchen", false, 1, url);
+        TodoResponse expected = new TodoResponse(1L, "Clean kitchen", false, 1, "/todos/1");
 
-        assertThat(TodoResponse.from(todo, url)).isEqualToComparingFieldByField(expected);
+        assertThat(TodoResponse.from(todo)).isEqualToComparingFieldByField(expected);
     }
 }

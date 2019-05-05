@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
@@ -39,7 +38,7 @@ public class TodoController {
     public @ResponseBody
     TodoResponse create(@RequestBody Todo newTodo) {
         Todo todo = repository.save(newTodo);
-        return TodoResponse.from(todo, getLinkToTodo(todo));
+        return TodoResponse.from(todo);
     }
 
     @RequestMapping(method = GET)
@@ -48,7 +47,7 @@ public class TodoController {
         List<Todo> all = repository.findAll();
 
         return all.stream()
-                .map(todo -> TodoResponse.from(todo, getLinkToTodo(todo)))
+                .map(TodoResponse::from)
                 .collect(Collectors.toList());
     }
 
@@ -63,7 +62,7 @@ public class TodoController {
     TodoResponse getOne(@PathVariable("id") Long id) throws NotFoundException {
         Todo todo = repository.findById(id).orElseThrow(() -> new NotFoundException("Todo does not exist!"));
 
-        return TodoResponse.from(todo, getLinkToTodo(todo));
+        return TodoResponse.from(todo);
     }
 
     @RequestMapping(value = "/{id}", method = PATCH)
@@ -85,7 +84,7 @@ public class TodoController {
 
             );
             Todo saved = repository.save(updatedTodo);
-            return TodoResponse.from(saved, getLinkToTodo(saved));
+            return TodoResponse.from(saved);
         } else {
             throw new NotFoundException("Todo not found");
         }
@@ -95,9 +94,5 @@ public class TodoController {
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteById(@PathVariable("id") Long id) {
         repository.deleteById(id);
-    }
-
-    private String getLinkToTodo(Todo todo) {
-        return linkTo(TodoController.class).slash(todo.getId()).withSelfRel().getHref();
     }
 }

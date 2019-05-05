@@ -21,8 +21,13 @@ public class TodoResponse {
     public TodoResponse() {
     }
 
-    static TodoResponse from(Todo todo, String url) {
-        return new TodoResponse(todo.getId(), todo.getTitle(), todo.isCompleted(), todo.getOrderNumber(), url);
+    static TodoResponse from(Todo todo) {
+        return new TodoResponse(
+                todo.getId(),
+                todo.getTitle(),
+                todo.isCompleted(),
+                todo.getOrderNumber(),
+                todo.getUrl());
     }
 
     public Integer getOrder() {
