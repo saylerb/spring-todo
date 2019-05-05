@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest
+@WebMvcTest(TodoController.class)
 public class WebLayerTest {
 
     public static final String API_ROOT = "/todos";
@@ -33,7 +33,6 @@ public class WebLayerTest {
     @Test
     public void shouldStartTodoControllerOnlyAndRetrieveWelcomeMessage() throws Exception {
         this.mockMvc.perform(get("/todos/hello"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Hello, World!")));
     }
@@ -47,7 +46,6 @@ public class WebLayerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{ \"title\": \"test todo\" }".getBytes())
                 .characterEncoding("utf-8"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("test todo"));
     }
