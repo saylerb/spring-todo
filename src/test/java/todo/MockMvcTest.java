@@ -80,8 +80,10 @@ public class MockMvcTest {
         TodoResponse createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(),
                 TodoResponse.class);
 
-        assertThat(createdTodo.getTitle()).isEqualTo("test todo");
-        assertThat(createdTodo.getUrl()).isNotNull();
+        TodoResponse expected = new TodoResponse(null, "test todo", false, null, null);
+
+        assertThat(createdTodo).hasNoNullFieldsOrPropertiesExcept("order");
+        assertThat(createdTodo).isEqualToIgnoringNullFields(expected);
     }
 
     @Test
