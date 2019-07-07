@@ -66,9 +66,17 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-hateoas')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation('io.rest-assured:rest-assured:3.3.0')
-    implementation('com.h2database:h2')
     implementation('org.flywaydb:flyway-core:5.2.4')
+    runtimeOnly 'org.postgresql:postgresql'
+}
 
+bootRun {
+    String activeProfile =  System.properties['spring.profiles.active']
+    systemProperty "spring.profiles.active", activeProfile
+}
+
+test {
+    systemProperty 'spring.profiles.active', 'test'
 }
 
 defaultTasks 'clean', 'build'
@@ -78,6 +86,7 @@ task databaseTest(type: Test) {
     description = 'Runs database tests.'
     testClassesDirs = sourceSets.databaseTest.output.classesDirs
     classpath = sourceSets.databaseTest.runtimeClasspath
+    systemProperty 'spring.profiles.active', 'test'
     shouldRunAfter test
 }
 
