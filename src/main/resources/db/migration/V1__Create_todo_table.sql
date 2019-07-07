@@ -1,6 +1,6 @@
-create table TODO
+CREATE TABLE todo
 (
-  id BIGINT IDENTITY not null,
+  id serial primary key,
   title varchar(100) not null,
   completed boolean not null default false,
   order_number int
