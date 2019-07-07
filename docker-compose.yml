@@ -2,10 +2,10 @@ version: "3"
 
 services:
   db:
-    image: postgres:11.4-alpine
+    build: ./postgres
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: todo
+      POSTGRES_MULTIPLE_DATABASES: todo,todo_test
     ports:
       - "5432:5432"
