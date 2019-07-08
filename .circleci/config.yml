@@ -15,7 +15,7 @@ jobs:
       - image: saylerb/spring-todo:0.0.1
         environment:
           POSTGRES_USER: admin
-          POSTGRES_MULTIPLE_DATABASES: circle_test
+          POSTGRES_MULTIPLE_DATABASES: todo_test
 
     working_directory: ~/repo
 
