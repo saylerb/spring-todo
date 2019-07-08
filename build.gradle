@@ -71,12 +71,15 @@ dependencies {
 }
 
 bootRun {
-    String activeProfile =  System.properties['spring.profiles.active']
+    String activeProfile = System.properties['spring.profiles.active']
     systemProperty "spring.profiles.active", activeProfile
 }
 
 test {
     systemProperty 'spring.profiles.active', 'test'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 task databaseTest(type: Test) {
@@ -85,6 +88,9 @@ task databaseTest(type: Test) {
     testClassesDirs = sourceSets.databaseTest.output.classesDirs
     classpath = sourceSets.databaseTest.runtimeClasspath
     systemProperty 'spring.profiles.active', 'test'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
     shouldRunAfter test
 }
 
