@@ -18,3 +18,12 @@ spec described at [https://www.todobackend.com/](https://www.todobackend.com/).
 * Navigate to [this
   link](https://www.todobackend.com/specs/index.html?http://localhost:8080/todos)
 to run tests.
+
+## Publishing the postgres docker image to dockerhub
+
+Publishing the postgres image so that CI can use it:
+
+* cd into `./postgres`
+* Run `docker build -t saylerb/spring-todo:0.0.1 .`
+* Run `docker login`
+* Run `docker push saylerb/spring-todo:0.0.1`
