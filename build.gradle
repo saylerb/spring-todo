@@ -79,8 +79,6 @@ test {
     systemProperty 'spring.profiles.active', 'test'
 }
 
-defaultTasks 'clean', 'build'
-
 task databaseTest(type: Test) {
     group = 'verification'
     description = 'Runs database tests.'
