@@ -27,3 +27,12 @@ Publishing the postgres image so that CI can use it:
 * Run `docker build -t saylerb/spring-todo:0.0.1 .`
 * Run `docker login`
 * Run `docker push saylerb/spring-todo:0.0.1`
+
+
+## Preventing tests run on heroku
+
+For now I've manually set the build command by running this heroku CLI command:
+
+```
+heroku config:set GRADLE_TASK="build -x test -x databaseTest"
+```
