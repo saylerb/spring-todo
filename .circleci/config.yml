@@ -12,7 +12,7 @@ workflows:
             - build
           filters:
             branches:
-              only: master
+              only: main
 
 version: 2
 jobs:
@@ -62,6 +62,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Deploy Master to Heroku
+          name: Deploy main to Heroku
           command: |
-            git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
+            git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git main
