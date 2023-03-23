@@ -16,18 +16,11 @@ plugins {
     id 'eclipse'
     id 'org.springframework.boot' version '2.1.4.RELEASE'
     id 'io.spring.dependency-management' version '1.0.7.RELEASE'
-    id 'org.assertj.generator' version '0.0.6b'
 }
-
-apply plugin: 'java'
 
 sourceCompatibility = 1.8
 
 sourceSets {
-    main {
-        assertJ {}
-    }
-
     databaseTest {
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
@@ -43,7 +36,6 @@ idea {
     module {
         testSourceDirs += sourceSets.databaseTest.java.srcDirs
         testResourceDirs += sourceSets.databaseTest.resources.srcDirs
-        scopes.TEST.plus += [configurations.databaseTestRuntime]
     }
 }
 
@@ -54,10 +46,6 @@ repositories {
 bootJar {
     baseName = 'spring-todo'
     version = '0.1.0'
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {

@@ -86,7 +86,7 @@ public class MockMvcTest {
 
         assertThat(createdTodo).isEqualToIgnoringNullFields(expected);
         assertThat(createdTodo).hasNoNullFieldsOrPropertiesExcept("order");
-        TodoResponseAssert.assertThat(createdTodo).hasTitle("test todo");
+        assertThat(createdTodo.getTitle()).isEqualTo("test todo");
     }
 
     @Test
@@ -108,7 +108,7 @@ public class MockMvcTest {
 
         TodoResponse resultTodo = objectMapper.readValue(result.getResponse().getContentAsString(), TodoResponse.class);
 
-        TodoResponseAssert.assertThat(resultTodo).isNotCompleted();
+        assertThat(resultTodo.isCompleted()).isFalse();
     }
 
     @Test
@@ -124,7 +124,7 @@ public class MockMvcTest {
         TodoResponse createdTodo = objectMapper.readValue(result.getResponse().getContentAsString(),
                 TodoResponse.class);
 
-        TodoResponseAssert.assertThat(createdTodo).hasUrl("http://localhost/todos/" + createdTodo.getId());
+        assertThat(createdTodo.getUrl()).isEqualTo("http://localhost/todos/" + createdTodo.getId());
     }
 
     @Test
