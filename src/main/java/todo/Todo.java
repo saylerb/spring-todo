@@ -16,7 +16,6 @@ public class Todo {
     private String title;
     private boolean completed;
     private Integer orderNumber;
-
     /**
      * No args constructor, needed for deserialization
      */

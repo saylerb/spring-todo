@@ -5,7 +5,6 @@ import org.junit.Test;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TodoResponseTest {
-
     @Test
     public void shouldSetAUrlOnTodo() {
         Todo todo = new Todo(1L, "Clean kitchen", false, 1);

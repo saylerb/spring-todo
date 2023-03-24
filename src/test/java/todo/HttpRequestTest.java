@@ -19,7 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(profiles = "test")
 public class HttpRequestTest {
-
     @LocalServerPort
     private int port;
 

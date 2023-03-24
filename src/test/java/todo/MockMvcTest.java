@@ -34,7 +34,6 @@ import static todo.WebLayerTest.API_ROOT;
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
 public class MockMvcTest {
-
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private MockMvc mockMvc;
@@ -179,7 +178,7 @@ public class MockMvcTest {
     }
 
     @Test
-    public void shouldBeAbleToPatchATodoWithAPartialUpdateToConfirmed() throws Exception {
+    public void shouldBeAbleToPatchATodoWithAPartialUpdateToCompleted() throws Exception {
         Todo newTodo = new Todo(null, "initial title", false, null);
 
         Todo savedTodo = todoRepository.save(newTodo);
@@ -227,6 +226,7 @@ public class MockMvcTest {
 
     @Test
     public void shouldPersistChangesAndShowUpWhenReFetchingTheTodo() throws Exception {
+        // TODO: Move to Database Integration Test
         Todo newTodo = new Todo(null, "initial title", false, null);
 
         Todo savedTodo = todoRepository.save(newTodo);
