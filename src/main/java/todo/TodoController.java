@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -60,31 +59,20 @@ public class TodoController {
     @RequestMapping(value = "/{id}", method = GET)
     public @ResponseBody
     TodoResponse getOne(@PathVariable("id") Long id) throws NotFoundException {
-        Todo todo = repository.findById(id).orElseThrow(() -> new NotFoundException("Todo does not exist!"));
-
+        Todo todo = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Todo does not exist!"));
         return TodoResponse.from(todo);
     }
 
     @RequestMapping(value = "/{id}", method = PATCH)
     public @ResponseBody
-    TodoResponse edit(@RequestBody Map<String, String> updates, @PathVariable("id") Long id) throws Exception {
+    TodoResponse edit(@RequestBody TodoPatchRequest updates, @PathVariable("id") Long id) throws Exception {
         Optional<Todo> byId = repository.findById(id);
 
         if (byId.isPresent()) {
             Todo existing = byId.get();
-
-            Optional<String> title = Optional.ofNullable(updates.get("title"));
-            Optional<String> completedString = Optional.ofNullable(updates.get("completed"));
-            Optional<String> order = Optional.ofNullable(updates.get("order"));
-
-            Todo updatedTodo = new Todo(existing.getId(),
-                    title.orElse(existing.getTitle()),
-                    completedString.map(Boolean::valueOf).orElseGet(existing::isCompleted),
-                    order.map(Integer::valueOf).orElse(null)
-
-            );
-            Todo saved = repository.save(updatedTodo);
-            return TodoResponse.from(saved);
+            Todo updatedTodo = Todo.from(updates, existing);
+            return TodoResponse.from(repository.save(updatedTodo));
         } else {
             throw new NotFoundException("Todo not found");
         }

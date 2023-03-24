@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -31,6 +32,15 @@ public class Todo {
         this.title = title;
         this.completed = completed;
         this.orderNumber = orderNumber;
+    }
+
+    static Todo from(TodoPatchRequest updates, Todo existing) {
+        return new Todo(
+                existing.getId(),
+                Optional.ofNullable(updates.getTitle()).orElse(existing.getTitle()),
+                Optional.ofNullable(updates.getCompleted()).orElseGet(existing::isCompleted),
+                updates.getOrder()
+        );
     }
 
     public String getTitle() {
