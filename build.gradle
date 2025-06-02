@@ -53,7 +53,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-web')
     implementation('org.springframework.boot:spring-boot-starter-hateoas')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
-    testImplementation('io.rest-assured:rest-assured:3.3.0')
     implementation('org.flywaydb:flyway-core:5.2.4')
     runtimeOnly 'org.postgresql:postgresql'
 }
