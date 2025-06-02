@@ -55,6 +55,7 @@ test {
     systemProperty 'spring.profiles.active', 'test'
     testLogging {
         events "passed", "skipped", "failed"
+        showStandardStreams = true
     }
 }
 
