@@ -42,8 +42,9 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-hateoas')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     implementation('org.flywaydb:flyway-core:5.2.4')
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly('org.postgresql:postgresql:42.2.5')
 }
+
 
 bootRun {
     String activeProfile = System.properties['spring.profiles.active']
