@@ -5,17 +5,13 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-
-@RunWith(SpringRunner.class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = NONE)
 @ActiveProfiles(profiles = "test")
@@ -27,7 +23,7 @@ public class RepositoryTest {
     @Autowired
     private TodoRepository todoRepository;
 
-    @After
+    @AfterEach
     public void cleanUp() {
         this.todoRepository.deleteAll();
     }

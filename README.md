@@ -1,38 +1,102 @@
-# spring-todo
+# Spring Todo API
 
-A simple api for a todo application built with Spring Boot, adhering to the
-spec described at [https://www.todobackend.com/](https://www.todobackend.com/).
+A RESTful Todo API built with Spring Boot that implements the
+[TodoBackend](https://www.todobackend.com/) specification.
 
-## Installation
+## Features
 
-* Clone this repo
-* Install Java (at least 8), docker
-* Start the postgres container: `docker-compose up -d`
-* Run the tests: `./gradlew`
-* Boot the application: `./gradlew -Dspring.profiles.active=dev`
+- Full CRUD operations for todos
+- PostgreSQL persistence with Flyway migrations
+- CORS support for web clients
+- Comprehensive test suite (unit + integration)
+- Docker containerization
 
-## Running the test harness 
+## Quick Start
 
-* Clone down this repo and cd into it
-* Run `./gradlew bootRun -Dspring.profiles.active=dev` to boot up the app
-* Navigate to [this
-  link](https://www.todobackend.com/specs/index.html?http://localhost:8080/todos)
-to run tests.
+### Prerequisites
+- Java 24 (required for Spring Boot 3.5.0)
+- Docker and Docker Compose
 
-## Publishing the postgres docker image to dockerhub
+### Installation
 
-Publishing the postgres image so that CI can use it:
+1. Clone this repository:
+   ```bash
+   git clone <repo-url>
+   cd spring-todo
+   ```
 
-* cd into `./postgres`
-* Run `docker build -t saylerb/spring-todo:0.0.1 .`
-* Run `docker login`
-* Run `docker push saylerb/spring-todo:0.0.1`
+2. Set Java 24 environment. For example on Mac
 
+   ```bash
+   export JAVA_HOME=/Path/to/JDK
+   ```
 
-## Preventing tests run on heroku
+3. Start PostgreSQL:
+   ```bash
+   docker-compose up -d
+   ```
 
-For now I've manually set the build command by running this heroku CLI command:
+4. Run tests:
+   ```bash
+   ./gradlew check
+   ```
 
-```
-heroku config:set GRADLE_TASK="build -x test -x databaseTest"
-```
+5. Start the application:
+   ```bash
+   ./gradlew bootRun -Dspring.profiles.active=dev
+   ```
+
+The API will be available at `http://localhost:8080/todos`
+
+## API Testing
+
+Test the API against the TodoBackend specification:
+
+1. Start the application in development mode
+2. Visit the [TodoBackend test suite](https://www.todobackend.com/specs/index.html?http://localhost:8080/todos)
+3. All tests should pass ✅
+
+## API Endpoints
+
+- `GET /todos` - List all todos
+- `POST /todos` - Create a new todo
+- `GET /todos/{id}` - Get a specific todo
+- `PATCH /todos/{id}` - Update a todo
+- `DELETE /todos/{id}` - Delete a specific todo
+- `DELETE /todos` - Delete all todos
+
+## Technology Stack
+
+- **Java 24** with Spring Boot 3.5.0
+- **PostgreSQL 15** for persistence
+- **Flyway** for database migrations
+- **JUnit 5** for testing
+- **Gradle 8.14** for build automation
+- **Docker** for containerization
+
+## Building Custom PostgreSQL Docker Image
+
+Publishing the Database Docker image is a manual process at the moment. 
+This enables CI to pull the image to run integration tests. To build and
+publish the custom PostgreSQL image for CI/CD:
+
+1. Navigate to the postgres directory:
+   ```bash
+   cd postgres
+   ```
+
+2. Build the Docker image:
+   ```bash
+   docker build -t saylerb/spring-todo-postgres:0.1.0 .
+   ```
+
+3. Login to Docker Hub:
+   ```bash
+   docker login
+   ```
+
+4. Push the image:
+   ```bash
+   docker push saylerb/spring-todo-postgres:0.1.0
+   ```
+

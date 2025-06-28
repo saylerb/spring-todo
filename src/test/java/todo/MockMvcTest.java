@@ -2,16 +2,15 @@ package todo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static todo.WebLayerTest.API_ROOT;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
@@ -40,7 +38,7 @@ public class MockMvcTest {
     @Autowired
     private TodoRepository todoRepository;
 
-    @After
+    @AfterEach
     public void cleanUp() {
         todoRepository.deleteAll();
     }
@@ -159,7 +157,7 @@ public class MockMvcTest {
         Todo savedTodo = todoRepository.save(newTodo);
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId())
-                .orElseThrow(() -> new NotFoundException("Todo not found!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found!"));
 
         MvcResult result = mockMvc.perform(
                 patch(API_ROOT + "/" + readBackTodo.getId())
@@ -184,7 +182,7 @@ public class MockMvcTest {
         Todo savedTodo = todoRepository.save(newTodo);
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId())
-                .orElseThrow(() -> new NotFoundException("Todo not found!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found!"));
 
         MvcResult result = mockMvc.perform(
                 patch(API_ROOT + "/" + readBackTodo.getId())
@@ -208,7 +206,7 @@ public class MockMvcTest {
         Todo savedTodo = todoRepository.save(newTodo);
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId())
-                .orElseThrow(() -> new NotFoundException("Todo not found!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found!"));
         TodoResponse expected = TodoResponse.from(readBackTodo);
 
         MvcResult result = mockMvc.perform(
@@ -232,7 +230,7 @@ public class MockMvcTest {
         Todo savedTodo = todoRepository.save(newTodo);
 
         Todo readBackTodo = todoRepository.findById(savedTodo.getId())
-                .orElseThrow(() -> new NotFoundException("Not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found"));
 
         TodoResponse expected = new TodoResponse(
                 savedTodo.getId(),

@@ -1,6 +1,6 @@
 package todo;
 
-import javassist.NotFoundException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,15 +58,15 @@ public class TodoController {
 
     @RequestMapping(value = "/{id}", method = GET)
     public @ResponseBody
-    TodoResponse getOne(@PathVariable("id") Long id) throws NotFoundException {
+    TodoResponse getOne(@PathVariable("id") Long id) {
         Todo todo = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Todo does not exist!"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo does not exist!"));
         return TodoResponse.from(todo);
     }
 
     @RequestMapping(value = "/{id}", method = PATCH)
     public @ResponseBody
-    TodoResponse edit(@RequestBody TodoPatchRequest updates, @PathVariable("id") Long id) throws Exception {
+    TodoResponse edit(@RequestBody TodoPatchRequest updates, @PathVariable("id") Long id) {
         Optional<Todo> byId = repository.findById(id);
 
         if (byId.isPresent()) {
@@ -74,7 +74,7 @@ public class TodoController {
             Todo updatedTodo = Todo.from(updates, existing);
             return TodoResponse.from(repository.save(updatedTodo));
         } else {
-            throw new NotFoundException("Todo not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found");
         }
     }
 
