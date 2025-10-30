@@ -1,11 +1,16 @@
 package todo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,11 +22,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
+@Import(WebLayerTest.MockConfig.class)
 public class WebLayerTest {
     @Autowired
     MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     TodoRepository todoRepository;
 
     public static final String API_ROOT = "/todos";
@@ -45,5 +51,19 @@ public class WebLayerTest {
                 .characterEncoding("utf-8"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("test todo"));
+    }
+
+    @AfterEach
+    void resetMocks() {
+        Mockito.reset(todoRepository);
+    }
+
+    @TestConfiguration
+    static class MockConfig {
+        @Bean
+        @Primary
+        TodoRepository todoRepository() {
+            return Mockito.mock(TodoRepository.class);
+        }
     }
 }
