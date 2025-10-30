@@ -8,7 +8,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -26,8 +26,8 @@ configurations {
 
 idea {
     module {
-        testSourceDirs += sourceSets.databaseTest.java.srcDirs
-        testResourceDirs += sourceSets.databaseTest.resources.srcDirs
+        testSources.from(sourceSets.databaseTest.java.srcDirs)
+        testResources.from(sourceSets.databaseTest.resources.srcDirs)
     }
 }
 
@@ -79,6 +79,7 @@ task databaseTest(type: Test) {
     classpath = sourceSets.databaseTest.runtimeClasspath
     systemProperty 'spring.profiles.active', 'test'
     jvmArgs '--enable-native-access=ALL-UNNAMED'
+    useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed", "started"
         exceptionFormat = 'full'

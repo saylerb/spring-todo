@@ -14,7 +14,7 @@ A RESTful Todo API built with Spring Boot that implements the
 ## Quick Start
 
 ### Prerequisites
-- Java 24 (required for Spring Boot 3.5.0)
+- Java 25 (EA) – make sure a compatible toolchain is installed locally
 - Docker and Docker Compose
 
 ### Installation
@@ -25,10 +25,10 @@ A RESTful Todo API built with Spring Boot that implements the
    cd spring-todo
    ```
 
-2. Set Java 24 environment. For example on Mac
+2. Set the Java 25 environment. For example on macOS:
 
    ```bash
-   export JAVA_HOME=/Path/to/JDK
+   export JAVA_HOME=$(/usr/libexec/java_home -v 25)
    ```
 
 3. Start PostgreSQL:
@@ -67,11 +67,11 @@ Test the API against the TodoBackend specification:
 
 ## Technology Stack
 
-- **Java 24** with Spring Boot 3.5.0
+- **Java 25** with Spring Boot 3.5.0
 - **PostgreSQL 15** for persistence
 - **Flyway** for database migrations
 - **JUnit 5** for testing
-- **Gradle 8.14** for build automation
+- **Gradle 9.1** for build automation
 - **Docker** for containerization
 
 ## Building Custom PostgreSQL Docker Image
@@ -99,4 +99,3 @@ publish the custom PostgreSQL image for CI/CD:
    ```bash
    docker push saylerb/spring-todo-postgres:0.1.0
    ```
-
